@@ -3,6 +3,7 @@ package com.spaceman.dimensionJump.fancyMessage.language.subCommands;
 import com.spaceman.dimensionJump.commandHandler.ArgumentType;
 import com.spaceman.dimensionJump.commandHandler.EmptyCommand;
 import com.spaceman.dimensionJump.commandHandler.SubCommand;
+import com.spaceman.dimensionJump.fancyMessage.Message;
 import com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme;
 import com.spaceman.dimensionJump.fancyMessage.language.Language;
 import org.bukkit.entity.Player;
@@ -27,7 +28,7 @@ public class Server extends SubCommand {
     
     @Override
     public void run(String[] args, Player player) {
-        // tport language server [language]
+        // command language server [language]
         
         if (args.length == 2) {
             ColorTheme.sendInfoTheme(player, "Server language is set to %s", Language.getServerLangName());
@@ -38,7 +39,7 @@ public class Server extends SubCommand {
                 sendErrorTheme(player, "Language file %s does not exist, therefore it could not be set", args[2]);
             }
         } else {
-            sendErrorTheme(player, "Usage: %s", "/tport language server [language]");
+            sendErrorTheme(player, "Usage: %s", "/" + Message.command + " language server [language]");
         }
     }
 }

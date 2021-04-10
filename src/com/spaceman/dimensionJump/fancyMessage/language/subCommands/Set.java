@@ -3,6 +3,7 @@ package com.spaceman.dimensionJump.fancyMessage.language.subCommands;
 import com.spaceman.dimensionJump.commandHandler.ArgumentType;
 import com.spaceman.dimensionJump.commandHandler.EmptyCommand;
 import com.spaceman.dimensionJump.commandHandler.SubCommand;
+import com.spaceman.dimensionJump.fancyMessage.Message;
 import com.spaceman.dimensionJump.fancyMessage.language.Language;
 import org.bukkit.entity.Player;
 
@@ -40,26 +41,26 @@ public class Set extends SubCommand {
     
     @Override
     public void run(String[] args, Player player) {
-        // tport language set custom
-        // tport language set server
-        // tport language set <server language>
+        // command language set custom
+        // command language set server
+        // command language set <server language>
         
         if (args.length == 3) {
             if (args[2].equalsIgnoreCase("custom")) {
                 Language.setPlayerLang(player.getUniqueId(), "custom");
-                sendSuccessTheme(player, "Successfully set your TPort language to %s, make sure that you are using a TPort Language Resource Pack", "custom");
+                sendSuccessTheme(player, "Successfully set your " + Message.pluginName + " language to %s, make sure that you are using a "  + Message.pluginName +  " Language Resource Pack", "custom");
             } else if (args[2].equalsIgnoreCase("server")) {
                 Language.setPlayerLang(player.getUniqueId(), "server");
-                sendSuccessTheme(player, "Successfully set your TPort language to %s", "server");
+                sendSuccessTheme(player, "Successfully set your " + Message.pluginName + " language to %s", "server");
             } else {
                 if (Language.setPlayerLang(player.getUniqueId(), args[2])) {
-                    sendSuccessTheme(player, "Successfully set your TPort language to %s", args[2].toLowerCase());
+                    sendSuccessTheme(player, "Successfully set your " + Message.pluginName + " language to %s", args[2].toLowerCase());
                 } else {
-                    sendErrorTheme(player, "TPort server language %s does not exist", args[2].toLowerCase());
+                    sendErrorTheme(player,  Message.pluginName + " server language %s does not exist", args[2].toLowerCase());
                 }
             }
         } else {
-            sendErrorTheme(player, "Usage: %s", "/tport language set <custom|server|<server language>>");
+            sendErrorTheme(player, "Usage: %s", "/" + Message.command + " language set <custom|server|<server language>>");
         }
     }
 }

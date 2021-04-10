@@ -1,26 +1,30 @@
 package com.spaceman.dimensionJump.permissions;
 
-import com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme;
+import com.spaceman.dimensionJump.fancyMessage.Message;
 import com.spaceman.dimensionJump.fileHander.Files;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static com.spaceman.dimensionJump.fancyMessage.Message.translateKeyPrefix;
+import static com.spaceman.dimensionJump.fancyMessage.TextComponent.textComponent;
+import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.ColorType.*;
+import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.formatErrorTranslation;
+import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.sendErrorTranslation;
 import static com.spaceman.dimensionJump.fileHander.GettingFiles.getFile;
 
 public class PermissionHandler {
     
-    public static String noPermMessage = "You don't have permission to do this";
     private static boolean permissionEnabled = false;
     
     public static void loadPermissionConfig() {
-        Files tportConfig = getFile("TPortConfig");
-        if (tportConfig.getConfig().contains("Permissions.enabled")) {
-            permissionEnabled = tportConfig.getConfig().getBoolean("Permissions.enabled");
+        Files config = getFile("config"); //todo set config
+        if (config.getConfig().contains("Permissions.enabled")) {
+            permissionEnabled = config.getConfig().getBoolean("Permissions.enabled");
         } else {
-            tportConfig.getConfig().set("Permissions.enabled", permissionEnabled);
-            tportConfig.saveConfig();
+            config.getConfig().set("Permissions.enabled", permissionEnabled);
+            config.saveConfig();
         }
     }
     
@@ -31,9 +35,9 @@ public class PermissionHandler {
     public static boolean enablePermissions(boolean state) {
         boolean tmp = permissionEnabled;
         permissionEnabled = state;
-        Files tportConfig = getFile("TPortConfig");
-        tportConfig.getConfig().set("Permissions.enabled", permissionEnabled);
-        tportConfig.saveConfig();
+        Files config = getFile("config"); //todo set config
+        config.getConfig().set("Permissions.enabled", permissionEnabled);
+        config.saveConfig();
         return tmp != permissionEnabled;
     }
     
@@ -51,22 +55,25 @@ public class PermissionHandler {
             return;
         }
         
-        ColorTheme theme = ColorTheme.getTheme(player);
-        
-        StringBuilder str = new StringBuilder();
-        str.append(theme.getErrorColor()).append(noPermMessage).append(", missing permission").append(permissions.size() == 1 ? "" : "s").append(": ");
-        str.append(theme.getVarErrorColor()).append(permissions.get(0));
-        boolean color = false;
-        for (int i = 1; i < permissions.size() - 1; i++) {
-            String permission = permissions.get(i);
-            str.append(theme.getErrorColor()).append(", ").append(color ? theme.getVarErrorColor() : theme.getVarError2Color()).append(permission);
-            color = !color;
+        if (permissions.size() == 1) {
+            sendErrorTranslation(player, translateKeyPrefix + ".permissions.permissionHandler.singular", permissions.get(0));
+        } else {
+            Message message = new Message();
+            message.addText(textComponent(permissions.get(0), varErrorColor).setInsertion(permissions.get(0)));
+            boolean color = false;
+            for (int i = 1; i < permissions.size() - 1; i++) {
+                String permission = permissions.get(i);
+                message.addText(textComponent(", ", errorColor));
+                message.addText(textComponent(permission, color ? varErrorColor : varError2Color).setInsertion(permission));
+                color = !color;
+            }
+            message.addWhiteSpace();
+            message.addMessage(formatErrorTranslation(translateKeyPrefix + ".permissions.permissionHandler." + (OR ? "or" : "and")));
+            message.addWhiteSpace();
+            String permission = permissions.get(permissions.size() - 1);
+            message.addText(textComponent(permission, color ? varErrorColor : varError2Color).setInsertion(permission));
+            sendErrorTranslation(player, translateKeyPrefix + ".permissions.permissionHandler.multiple", message);
         }
-        if (permissions.size() > 1) {
-            str.append(theme.getErrorColor()).append(" ").append(OR ? "or" : "and").append(" ")
-                    .append(color ? theme.getVarErrorColor() : theme.getVarError2Color()).append(permissions.get(permissions.size() - 1));
-        }
-        player.sendMessage(str.toString());
     }
     
     public static boolean hasPermission(Player player, String... permissions) {

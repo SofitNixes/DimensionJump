@@ -23,6 +23,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
@@ -37,6 +38,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -164,7 +166,6 @@ public class MessageUtils {
         
         return message;
     }
-    
     private static List<MultiColor> createGradient(int size, List<MultiColor> colorList) {
         if (colorList.size() == 2) {
             List<MultiColor> newColorList = new ArrayList<>();
@@ -474,11 +475,16 @@ public class MessageUtils {
         message.getText().stream().map(t -> translateTextComponent(t, translateFile)).forEach(hEvent::addMessage);
         return hEvent;
     }
-    
     public static Message translateTextComponent(TextComponent textComponent, JSONObject translateFile) {
         return translateMessage(new Message(textComponent), translateFile);
     }
-    
+    public static Collection<Message> translateMessage(Collection<Message> toTranslate, JSONObject translateFile) {
+        Collection<Message> returnCollection = new ArrayList<>();
+        for (Message message : toTranslate) {
+            returnCollection.add(translateMessage(message, translateFile));
+        }
+        return returnCollection;
+    }
     public static Message translateMessage(Message toTranslate, JSONObject translateFile) {
         Message message = new Message();
         
@@ -559,16 +565,19 @@ public class MessageUtils {
                             } else if (innerTextPiece.matches("(?i)" + formattingPattern)) { //formatting
                                 switch (innerTextPiece.charAt(2)) {
                                     case 'k': //obfuscated
-                                        if (!attributes.remove(Attribute.OBFUSCATED)) attributes.add(Attribute.OBFUSCATED);
+                                        if (!attributes.remove(Attribute.OBFUSCATED))
+                                            attributes.add(Attribute.OBFUSCATED);
                                         break;
                                     case 'l': //bold
                                         if (!attributes.remove(Attribute.BOLD)) attributes.add(Attribute.BOLD);
                                         break;
                                     case 'm': //strikethrough
-                                        if (!attributes.remove(Attribute.STRIKETHROUGH)) attributes.add(Attribute.STRIKETHROUGH);
+                                        if (!attributes.remove(Attribute.STRIKETHROUGH))
+                                            attributes.add(Attribute.STRIKETHROUGH);
                                         break;
                                     case 'n': //underline
-                                        if (!attributes.remove(Attribute.UNDERLINED)) attributes.add(Attribute.UNDERLINED);
+                                        if (!attributes.remove(Attribute.UNDERLINED))
+                                            attributes.add(Attribute.UNDERLINED);
                                         break;
                                     case 'o': //italic
                                         if (!attributes.remove(Attribute.ITALIC)) attributes.add(Attribute.ITALIC);
@@ -599,7 +608,6 @@ public class MessageUtils {
     public static ItemStack setCustomName(ItemStack is, Player player, Message displayName) {
         return setCustomName(is, ColorTheme.getTheme(player), displayName);
     }
-    
     public static ItemStack setCustomName(ItemStack is, ColorTheme theme, Message displayName) {
         // {display:{Name:"[{"text":"forward is "},{"keybind":"key.forward"}]"}}
         try {
@@ -618,17 +626,23 @@ public class MessageUtils {
             return is;
             
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignore) {
+            return setCustomItemData(is, theme, displayName, null);
         }
-        
-        return null;
     }
-    
     public static ItemStack setCustomLore(ItemStack is, Player player, Message... lore) {
+        return setCustomLore(is, ColorTheme.getTheme(player), Arrays.asList(lore));
+    }
+    public static ItemStack setCustomLore(ItemStack is, Player player, Collection<Message> lore) {
         return setCustomLore(is, ColorTheme.getTheme(player), lore);
     }
-    
     public static ItemStack setCustomLore(ItemStack is, ColorTheme theme, Message... lore) {
+        return setCustomLore(is, theme, Arrays.asList(lore));
+    }
+    public static ItemStack setCustomLore(ItemStack is, ColorTheme theme, Collection<Message> lore) {
         // {display:{Lore:['[{"text":"testA"},{"text":"testB"}]','[{"text":"testC"}]']}}
+        return setCustomItemData(is, theme, null, lore);
+    }
+    public static ItemStack setCustomItemData(ItemStack is, ColorTheme theme, @Nullable Message displayName, @Nullable Collection<Message> lore) {
         try {
             String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
             Class<?> craftItemStack = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
@@ -643,11 +657,17 @@ public class MessageUtils {
             JsonObject jsonObject = (JsonObject) new JsonParser().parse(asJSON);
             JsonObject displayTag = jsonObject.getAsJsonObject("display");
             if (displayTag == null) displayTag = new JsonObject();
-            JsonArray loreTag = new JsonArray();
-            for (Message line : lore) loreTag.add(line.translateJSON(theme));
-            displayTag.add("Lore", loreTag);
+            
+            //this is for the lore
+            if (lore != null) {
+                JsonArray loreTag = new JsonArray();
+                for (Message line : lore) loreTag.add(line.translateJSON(theme));
+                displayTag.add("Lore", loreTag);
+            }
+            //this is for display name
+            if (displayName != null) displayTag.addProperty("Name", displayName.translateJSON(theme));
+            
             jsonObject.add("display", displayTag);
-//            displayTag.addProperty("Name", displayName.translateJSON(theme)); //this is for display name
             
             Class<?> mojangsonParser = Class.forName("net.minecraft.server." + version + ".MojangsonParser");
             Object nbtTagCompound = mojangsonParser.getMethod("parse", String.class).invoke(mojangsonParser, jsonObject.toString());

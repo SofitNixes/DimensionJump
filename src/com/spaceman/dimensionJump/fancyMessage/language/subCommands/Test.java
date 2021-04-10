@@ -10,6 +10,8 @@ import org.json.simple.JSONObject;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import static com.spaceman.dimensionJump.fancyMessage.Message.command;
+import static com.spaceman.dimensionJump.fancyMessage.Message.translateKeyPrefix;
 import static com.spaceman.dimensionJump.fancyMessage.MessageUtils.getOrDefaultCaseInsensitive;
 import static com.spaceman.dimensionJump.fancyMessage.TextComponent.textComponent;
 import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.sendErrorTheme;
@@ -24,21 +26,21 @@ public class Test extends SubCommand {
     
     @Override
     public void run(String[] args, Player player) {
-        // tport language test <id>
+        // command language test <id>
         
         if (args.length == 3) {
             JSONObject translation = Language.getPlayerLang(player.getUniqueId());
             String raw = args[2];
             if (translation == null) {
-                ColorTheme.formatInfoTranslation("tport.language.test", raw, textComponent(raw).setType(TextType.TRANSLATE)).sendMessage(player);
+                ColorTheme.formatInfoTranslation(translateKeyPrefix + ".language.test", raw, textComponent(raw).setType(TextType.TRANSLATE)).sendMessage(player);
             } else if (getOrDefaultCaseInsensitive(translation, raw, null) != null) {
                 String translated = (String) translation.get(raw);
-                ColorTheme.sendInfoTranslation(player, "tport.language.test", raw, translated);
+                ColorTheme.sendInfoTranslation(player, translateKeyPrefix + ".language.test", raw, translated);
             } else {
                 sendErrorTheme(player, "%s is not used as translation id", raw);
             }
         } else {
-            sendErrorTheme(player, "Usage: %s", "/tport language test <id>");
+            sendErrorTheme(player, "Usage: %s", "/" + command + " language test <id>");
         }
     }
 }

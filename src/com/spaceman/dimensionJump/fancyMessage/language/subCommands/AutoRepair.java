@@ -7,7 +7,7 @@ public class AutoRepair extends SubCommand {
     
     @Override
     public void run(String[] args, Player player) {
-        // tport language autoRepair [state]
+        // command language autoRepair [state]
         
     }
 }

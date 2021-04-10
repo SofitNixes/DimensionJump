@@ -1,13 +1,11 @@
 package com.spaceman.dimensionJump.playerUUID;
 
+import com.spaceman.dimensionJump.Main;
+import com.spaceman.dimensionJump.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
-import javax.annotation.Nullable;
 import java.util.UUID;
-
-import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.sendErrorTheme;
 
 public class PlayerUUID {
     
@@ -24,33 +22,24 @@ public class PlayerUUID {
         if (uuid == null) return null;
         try {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            if (!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline()) {
-                return null;
-            }
-            return offlinePlayer.getName();
+            return !offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline() ? null : offlinePlayer.getName();
         } catch (IllegalArgumentException iae) {
             return null;
         }
     }
     
-    public static String getPlayerUUID(String playerName) {
-        for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
-            if ((op.hasPlayedBefore() || op.isOnline()) && op.getName() != null && op.getName().equalsIgnoreCase(playerName)) {
-                return op.getUniqueId().toString();
-            }
-        }
-        return null;
+    // returns null if not found
+    public static UUID getPlayerUUID(String playerName) {
+        return Main.getOrDefault(getProfile(playerName), new Pair<String, UUID>(null, null)).getRight();
     }
     
-    public static String getPlayerUUID(@Nullable Player player, String name) {
-        String newPlayerUUID = PlayerUUID.getPlayerUUID(name);
-        if (newPlayerUUID == null) {
-            if (player != null) {
-//                player.sendMessage(formatError("Could not find a player named %s", name)); //uses ColorFormatter
-                sendErrorTheme(player, "Could not find a player named %s", name); //uses ColorTheme
+    // returns null values if not found
+    public static Pair<String, UUID> getProfile(String playerName) {
+        for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
+            if ((op.hasPlayedBefore() || op.isOnline()) && op.getName() != null && op.getName().equalsIgnoreCase(playerName)) {
+                return new Pair<>(op.getName(), op.getUniqueId());
             }
-            return null;
         }
-        return newPlayerUUID;
+        return new Pair<>(null, null);
     }
 }

@@ -16,8 +16,121 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public abstract class CommandTemplate extends Command implements CommandExecutor, TabCompleter {
+    
+    /*
+    * This is the main file, your command should extend this class (HeadCommand.java is older version)
+    * This Permission Util uses the following utils:
+    * - FancyMessage
+    * - ColorTheme
+    *
+    * This allows you to easily manage your commands
+    *
+    * To use the made help command for your command ->
+    * In your CommandTemplate you add the HelpCommand your its actions.
+    * Each sub-command should have set the command name and argument type to generate the help command
+    */
+    
+    /* example 1
+    * /command subCommand [sub1 (only integers)]
+    * /command subCommand [sub2...]
+    *
+    * EmptyCommand sub1 = new SubCommand(){
+    *     @Override
+    *     public void getName(String argument) {
+    *         return argument
+    *     }
+    * };
+    * sub1.setCommandName("sub1", ArgumentType.OPTIONAL);
+    * sub1.setRunnable((args, player) -> { your command code });
+    *
+    * EmptyCommand sub2 = new EmptyCommand() {
+    *     @Override
+    *     public String getName(String argument) {
+    *         //only return 'argument' if its the right one,
+    *         // in this case sub1 only accepts integers
+    *         try { Integer.parseInt(argument); return ""; }
+    *         catch (NumberFormatException nfe) { return argument; }
+    *     }
+    * };
+    * sub2.setCommandName("sub2", ArgumentType.OPTIONAL);
+    * sub2.setLooped(true);
+    *
+    * addAction(sub2); //REGISTER sub2 BEFORE sub1
+    * addAction(sub1);
+    *
+    * /* example 2
+    * /command subCommand <variable> <command1|command2>
+    *
+    * EmptyCommand variableCommand = new EmptyCommand(){
+    *     @Override
+    *     public String getName(String arg) {
+    *         return arg;
+    *     }
+    * };
+    * variableCommand.setRunnable((args, player) -> {
+    *     if (args.length > 2) {
+    *         if (!runCommands(variableCommand.getActions(), args[2], args, player)) {
+    *             //right command not given (/command subCommand <variable> <command3>)
+    *             player.sendMessage(formatError("Usage: %s", "/command subCommand <variable> <command1|command2>"));
+    *         }
+    *     } else {
+    *         //not enough arguments (/command subCommand <variable>)
+    *         player.sendMessage(formatError("Usage: %s", "/command subCommand <variable> <command1|command2>"));
+    *     }
+    * });
+    * variableCommand.setTabRunnable((args, player) -> {
+    *     ArrayList<String> list = new ArrayList<>();
+    *     for (SubCommand subCommand : variableCommand.getActions()) {
+    *         list.add(subCommand.getName(null));
+    *     }
+    *     return list;
+    * });
+    * variableCommand.addAction(new SubCommand());//register here your commands
+    * this.addAction(variableCommand);
+    *
+    * /* example 3
+    * /command <subCommand>
+    * /command <subCommand> <arg>
+    *
+    * EmptyCommand empty = new EmptyCommand() {
+    *     @Override
+    *     public String getName(String argument) {
+    *         return "";
+    *     }
+    * };
+    *
+    * EmptyCommand emptyArg = new EmptyCommand();
+    *
+    * subCommand.addAction(empty);
+    * subCommand.addAction(emptyArg);
+    *
+    * You have to register a 'dummy' command to make the help command work properly.
+    *
+    * */
+    
+    @Deprecated
+    public static boolean executeInternal(CommandSender sender, String command, String args) {
+        return executeInternal(sender, command, args.split(" "));
+    }
+    
+    @Deprecated
+    public static boolean executeInternal(CommandSender sender, String command, String[] args) {
+        try {
+            final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            bukkitCommandMap.setAccessible(true);
+            CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
+            
+            Command c = commandMap.getCommand(command);
+            if (c != null) {
+                c.execute(sender, command, args);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     
     protected ArrayList<SubCommand> actions = new ArrayList<>();
     private Message commandDescription = null;

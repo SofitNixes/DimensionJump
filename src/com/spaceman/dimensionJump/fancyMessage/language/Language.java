@@ -4,11 +4,9 @@ import com.spaceman.dimensionJump.Main;
 import com.spaceman.dimensionJump.commandHandler.CommandTemplate;
 import com.spaceman.dimensionJump.commandHandler.SubCommand;
 import com.spaceman.dimensionJump.fancyMessage.Message;
-import com.spaceman.dimensionJump.fancyMessage.TextType;
 import com.spaceman.dimensionJump.fancyMessage.language.subCommands.*;
 import com.spaceman.dimensionJump.fileHander.Files;
 import com.spaceman.dimensionJump.fileHander.GettingFiles;
-import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.FilenameUtils;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
@@ -25,12 +23,11 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import static com.spaceman.dimensionJump.commandHandler.CommandTemplate.runCommands;
-import static com.spaceman.dimensionJump.fancyMessage.TextComponent.textComponent;
 import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.sendErrorTheme;
 
 public class Language extends SubCommand { //todo translate
     
-    protected static String configFileName = "TPortConfig";
+    protected static String configFileName = "config"; //todo set config
     protected static HashMap<String, JSONObject> languages = new HashMap<>();
     
     public static boolean setServerLang(String lang) {
@@ -178,36 +175,19 @@ public class Language extends SubCommand { //todo translate
     
     @Override
     public void run(String[] args, Player player) {
-        // tport language server [language]
-        // tport language get
-        // tport language set custom
-        // tport language set server
-        // tport language set <server language>
-        // tport language autoRepair [state]
+        // command language server [language]
+        // command language get
+        // command language set custom
+        // command language set server
+        // command language set <server language>
+        // command language autoRepair [state]
         
         if (args.length > 1) {
             if (runCommands(getActions(), args[1], args, player)) {
                 return;
             }
-            sendErrorTheme(player, "Usage: %s", "/tport language " + CommandTemplate.convertToArgs(getActions(), false));
             return;
         }
-        
-        Message message = new Message();
-        
-        message.addText(textComponent("tport.test.test1").setType(TextType.TRANSLATE).addTranslateWith(textComponent("wait, what?")));
-        message.addNewLine();
-        message.addText(textComponent("tport.test.test3").setType(TextType.TRANSLATE).addTranslateWith(textComponent("earth", ChatColor.YELLOW)));
-        message.addNewLine();
-        message.addText(textComponent("tport.test.test4").setType(TextType.TRANSLATE)
-                .addTranslateWith(textComponent("tport.test.test3").setType(TextType.TRANSLATE).addTranslateWith(textComponent("world", ChatColor.YELLOW))));
-        message.addNewLine();
-        message.addText(textComponent("tport.test.test2").setType(TextType.TRANSLATE).addTranslateWith(textComponent("testA", ChatColor.GREEN)));
-        
-        message.sendAndTranslateMessage(player);
-    }
-    
-    void sendInfoMessage() {
-    
+        sendErrorTheme(player, "Usage: %s", "/" + Message.command + " language " + CommandTemplate.convertToArgs(getActions(), false));
     }
 }

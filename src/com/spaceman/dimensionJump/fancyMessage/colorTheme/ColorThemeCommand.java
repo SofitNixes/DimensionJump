@@ -15,11 +15,16 @@ import java.util.stream.Stream;
 
 import static com.spaceman.dimensionJump.commandHandler.CommandTemplate.convertToArgs;
 import static com.spaceman.dimensionJump.commandHandler.CommandTemplate.runCommands;
+import static com.spaceman.dimensionJump.fancyMessage.Message.translateKeyPrefix;
 import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.*;
 
 public class ColorThemeCommand extends SubCommand {
     
-    public ColorThemeCommand() {
+    private final String commandName;
+    
+    public ColorThemeCommand(String commandName) {
+        this.commandName = commandName;
+        
         EmptyCommand empty = new EmptyCommand() {
             @Override
             public String getName(String argument) {
@@ -27,14 +32,14 @@ public class ColorThemeCommand extends SubCommand {
             }
         };
         empty.setCommandName("");
-        empty.setCommandDescription(formatInfoTranslation("tport.colorTheme.commandDescription"));
+        empty.setCommandDescription(formatInfoTranslation(translateKeyPrefix + ".colorTheme.commandDescription"));
         
         EmptyCommand emptySetTypeChat = new EmptyCommand();
         emptySetTypeChat.setCommandName("chat color", ArgumentType.REQUIRED);
-        emptySetTypeChat.setCommandDescription(formatInfoTranslation("tport.colorTheme.set.type.chat.commandDescription"));
+        emptySetTypeChat.setCommandDescription(formatInfoTranslation(translateKeyPrefix + ".colorTheme.set.type.chat.commandDescription"));
         EmptyCommand emptySetTypeHex = new EmptyCommand();
         emptySetTypeHex.setCommandName("hex color", ArgumentType.REQUIRED);
-        emptySetTypeHex.setCommandDescription(formatInfoTranslation("tport.colorTheme.set.type.hex.commandDescription"));
+        emptySetTypeHex.setCommandDescription(formatInfoTranslation(translateKeyPrefix + ".colorTheme.set.type.hex.commandDescription"));
         EmptyCommand emptySetType = new EmptyCommand() {
             @Override
             public String getName(String argument) {
@@ -58,26 +63,26 @@ public class ColorThemeCommand extends SubCommand {
         emptySetType.setRunnable(((args, player) -> {
             if (args.length == 4) {
                 if (ColorType.getTypes().contains(args[2])) {
-                    if (Arrays.stream(ChatColor.values()).map(ChatColor::name).anyMatch(c -> c.equalsIgnoreCase(args[3]))) { //tport colorTheme set <type> <chat color>
+                    if (Arrays.stream(ChatColor.values()).map(ChatColor::name).anyMatch(c -> c.equalsIgnoreCase(args[3]))) { //command colorTheme set <type> <chat color>
                         ColorType.valueOf(args[2]).setColor(player, new MultiColor(ChatColor.valueOf(args[3].toUpperCase())));
                         
-                        Message message = formatTranslation(ColorType.valueOf(args[2]), ColorType.varInfo2Color, "tport.colorTheme.this");
+                        Message message = formatTranslation(ColorType.valueOf(args[2]), ColorType.varInfo2Color, translateKeyPrefix + ".colorTheme.this");
                         message.getText().forEach(t -> t.setInsertion(ColorType.valueOf(args[2]).getColor(player).getColorAsValue()));
-                        sendSuccessTranslation(player, "tport.colorTheme.set.type.chat.succeeded", ColorType.valueOf(args[2]).name(), message);
-                    } else if (args[3].matches("#[0-9a-fA-F]{6}")) {//tport colorTheme set <type> <hex color>
+                        sendSuccessTranslation(player, translateKeyPrefix + ".colorTheme.set.type.chat.succeeded", ColorType.valueOf(args[2]).name(), message);
+                    } else if (args[3].matches("#[0-9a-fA-F]{6}")) {//command colorTheme set <type> <hex color>
                         ColorType.valueOf(args[2]).setColor(player, new MultiColor(args[3]));
                         
-                        Message message = formatTranslation(ColorType.valueOf(args[2]), ColorType.varInfo2Color, "tport.colorTheme.this");
+                        Message message = formatTranslation(ColorType.valueOf(args[2]), ColorType.varInfo2Color, translateKeyPrefix + ".colorTheme.this");
                         message.getText().forEach(t -> t.setInsertion(ColorType.valueOf(args[2]).getColor(player).getColorAsValue()));
-                        sendSuccessTranslation(player, "tport.colorTheme.set.type.hex.succeeded", ColorType.valueOf(args[2]).name(), message);
+                        sendSuccessTranslation(player, translateKeyPrefix + ".colorTheme.set.type.hex.succeeded", ColorType.valueOf(args[2]).name(), message);
                     } else {
-                        sendErrorTranslation(player, "tport.colorTheme.set.type.colorNotFound", args[3]);
+                        sendErrorTranslation(player, translateKeyPrefix + ".colorTheme.set.type.colorNotFound", args[3]);
                     }
                 } else {
-                    sendErrorTranslation(player, "tport.colorTheme.set.type.colorTypeNotFound", args[2]);
+                    sendErrorTranslation(player, translateKeyPrefix + ".colorTheme.set.type.colorTypeNotFound", args[2]);
                 }
             } else {
-                sendErrorTranslation(player, "tport.command.wrongUsage", "Usage: %s", "/tport colorTheme set <type> <chat color|hex color>");
+                sendErrorTranslation(player, translateKeyPrefix + ".command.wrongUsage", "/" + commandName + " colorTheme set <type> <chat color|hex color>");
             }
         }));
         emptySetType.addAction(emptySetTypeChat);
@@ -90,13 +95,13 @@ public class ColorThemeCommand extends SubCommand {
             }
         };
         emptySetTheme.setCommandName("theme", ArgumentType.REQUIRED);
-        emptySetTheme.setCommandDescription(formatInfoTranslation("tport.colorTheme.set.theme.commandDescription"));
+        emptySetTheme.setCommandDescription(formatInfoTranslation(translateKeyPrefix + ".colorTheme.set.theme.commandDescription"));
         emptySetTheme.setRunnable(((args, player) -> {
             if (args.length == 3) {
                 ColorTheme.setDefaultTheme(player, args[2]);
-                sendSuccessTranslation(player, "tport.colorTheme.set.theme.succeeded", args[2]);
+                sendSuccessTranslation(player, translateKeyPrefix + ".colorTheme.set.theme.succeeded", args[2]);
             } else {
-                sendErrorTranslation(player, "tport.command.wrongUsage", "Usage: %s", "/tport colorTheme set <theme>");
+                sendErrorTranslation(player, translateKeyPrefix + ".command.wrongUsage", "/" + commandName + " colorTheme set <theme>");
             }
         }));
         EmptyCommand emptySet = new EmptyCommand() {
@@ -111,14 +116,14 @@ public class ColorThemeCommand extends SubCommand {
             if (args.length > 2 && runCommands(emptySet.getActions(), args[2], args, player)) {
                 return;
             }
-            sendErrorTranslation(player, "tport.command.wrongUsage", "/tport colorTheme set " + convertToArgs(emptySet.getActions(), false));
+            sendErrorTranslation(player, translateKeyPrefix + ".command.wrongUsage", "/" + commandName + " colorTheme set " + convertToArgs(emptySet.getActions(), false));
         }));
         emptySet.addAction(emptySetTheme);
         emptySet.addAction(emptySetType);
         
         EmptyCommand emptyGetType = new EmptyCommand();
         emptyGetType.setCommandName("type", ArgumentType.REQUIRED);
-        emptyGetType.setCommandDescription(formatInfoTranslation("tport.colorTheme.get.commandDescription"));
+        emptyGetType.setCommandDescription(formatInfoTranslation(translateKeyPrefix + ".colorTheme.get.commandDescription"));
         EmptyCommand emptyGet = new EmptyCommand() {
             @Override
             public String getName(String argument) {
@@ -130,14 +135,14 @@ public class ColorThemeCommand extends SubCommand {
         emptyGet.setRunnable(((args, player) -> {
             if (args.length == 3) {
                 if (ColorType.getTypes().contains(args[2])) {
-                    Message message = formatTranslation(ColorType.valueOf(args[2]), ColorType.varInfo2Color, "tport.colorTheme.this");
+                    Message message = formatTranslation(ColorType.valueOf(args[2]), ColorType.varInfo2Color, translateKeyPrefix + ".colorTheme.this");
                     message.getText().forEach(t -> t.setInsertion(ColorType.valueOf(args[2]).getColor(player).getColorAsValue()));
-                    sendInfoTranslation(player, "tport.colorTheme.get.succeeded", ColorType.valueOf(args[2]).name(), message);
+                    sendInfoTranslation(player, translateKeyPrefix + ".colorTheme.get.succeeded", ColorType.valueOf(args[2]).name(), message);
                 } else {
-                    sendErrorTheme(player, "tport.colorTheme.get.colorNotFound", args[2]);
+                    sendErrorTheme(player, translateKeyPrefix + ".colorTheme.get.colorNotFound", args[2]);
                 }
             } else {
-                sendErrorTranslation(player, "tport.command.wrongUsage", "/tport colorTheme get <type>");
+                sendErrorTranslation(player, translateKeyPrefix + ".command.wrongUsage", "/" + commandName + " colorTheme get <type>");
             }
         }));
         emptyGet.addAction(emptyGetType);
@@ -154,21 +159,21 @@ public class ColorThemeCommand extends SubCommand {
     
     @Override
     public void run(String[] args, Player player) {
-        //tport colorTheme
-        //tport colorTheme set <theme>
-        //tport colorTheme set <type> <chat color>
-        //tport colorTheme set <type> <hex color>
-        //tport colorTheme get <type>
+        //command colorTheme
+        //command colorTheme set <theme>
+        //command colorTheme set <type> <chat color>
+        //command colorTheme set <type> <hex color>
+        //command colorTheme get <type>
         
         if (args.length == 1) {
-            sendInfoTranslation(player, "tport.colorTheme.succeeded", "info");
-            sendSuccessTranslation(player, "tport.colorTheme.succeeded", "success");
-            sendErrorTranslation(player, "tport.colorTheme.succeeded", "error");
+            sendInfoTranslation(player, translateKeyPrefix + ".colorTheme.succeeded", "info");
+            sendSuccessTranslation(player, translateKeyPrefix + ".colorTheme.succeeded", "success");
+            sendErrorTranslation(player, translateKeyPrefix + ".colorTheme.succeeded", "error");
         } else {
             if (runCommands(getActions(), args[1], args, player)) {
                 return;
             }
-            sendErrorTranslation(player, "tport.command.wrongUsage", "/tport colorTheme " + convertToArgs(getActions(), true));
+            sendErrorTranslation(player, translateKeyPrefix + ".command.wrongUsage", "/" + commandName + " colorTheme " + convertToArgs(getActions(), true));
         }
     }
 }

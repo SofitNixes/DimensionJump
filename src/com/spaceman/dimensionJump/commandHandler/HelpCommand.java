@@ -13,12 +13,45 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.spaceman.dimensionJump.commandHandler.CommandTemplate.runCommands;
-import static com.spaceman.dimensionJump.fancyMessage.TextComponent.textComponent;
+import static com.spaceman.dimensionJump.fancyMessage.Message.translateKeyPrefix;
 import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.*;
 import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.ColorType.*;
+import static com.spaceman.dimensionJump.commandHandler.CommandTemplate.runCommands;
+import static com.spaceman.dimensionJump.fancyMessage.TextComponent.textComponent;
 
 public class HelpCommand extends SubCommand {
+    
+    /*
+    * This help sub command is created with ColorTheme and ColorFormatter,
+    * to use ColorTheme import: 'import static com.spaceman.colorFormatter.ColorTheme.ColorType.*;'
+    * to use ColorFormatter import: 'import static com.spaceman.colorFormatter.ColorFormatter.*;'
+    *
+    * as default its set to ColorTheme
+    *
+    * Example on how to use:
+    *
+    * in your CommandTemplate you can override the registerActions method
+    * put there:
+    *
+    * HelpCommand helpCommand = new HelpCommand(this);
+    * addAction(helpCommand);
+    *
+    * This is a simple help command. It automatic collects all the commands that are in the CommandTemplate.
+    * You have to be sure that ALL your sub commands have the commandName and commandDescription set.
+    *
+    * If you want more help pages (for extra explanation):
+    * helpCommand.addExtraHelp("ExtraHelpName", new Message(textComponent("your extra help info to be send on execution"))); //or
+    * helpCommand.addExtraHelp("ExtraHelpName", (args, player) -> {//your code to be executed})); //or
+    * EmptyCommand extraHelpCommand = new EmptyCommand(){
+    *    @Override
+    *    public String getName(String arg) {
+    *        return "ExtraHelpName";
+    *    }
+    *};
+    * extraHelpCommand.setRunnable((args, player) -> {//your code to be executed});
+    * helpCommand.addExtraHelp("ExtraHelpName", extraHelpCommand);
+    *
+    * */
     
     private int listSize = 10;
     private final CommandTemplate template;
@@ -26,7 +59,7 @@ public class HelpCommand extends SubCommand {
     private final List<String> extraHelp = new ArrayList<>();
     
     public HelpCommand(CommandTemplate template) {
-        this(template, formatInfoTranslation("tport.command.help.defaultDescription"));
+        this(template, formatInfoTranslation(translateKeyPrefix + ".command.help.defaultDescription"));
         template.getPlugin().getLogger().info("No help command description given, using default one for " + template.getName());
     }
     
@@ -46,14 +79,14 @@ public class HelpCommand extends SubCommand {
             }
         };
         commandList.setCommandName("page", ArgumentType.REQUIRED);
-        commandList.setCommandDescription(formatInfoTranslation("tport.command.help.page.commandDescription"));
+        commandList.setCommandDescription(formatInfoTranslation(translateKeyPrefix + ".command.help.page.commandDescription"));
         commandList.setRunnable((args, player) -> {
             
             int startIndex;
             try {
                 startIndex = (Integer.parseInt(args[1]) - 1) * listSize;
             } catch (NumberFormatException nfe) {
-                sendErrorTranslation(player, "tport.command.help.page.notANumber", args[1]);
+                sendErrorTranslation(player, translateKeyPrefix + ".command.help.page.notANumber", args[1]);
                 return;
             }
             
@@ -97,13 +130,13 @@ public class HelpCommand extends SubCommand {
                 
                 TextComponent commandComponent = commandToComponent(command, subCommand, player, color);
                 commands.addText(commandComponent);
-    
+                
                 commands.addNewLine();
                 color = !color;
             }
             commands.removeLast();
             
-            sendInfoTranslation(player, "tport.command.help.page.succeeded", "/" + template.getName(), page, buttons, commands);
+            sendInfoTranslation(player, translateKeyPrefix + ".command.help.page.succeeded", "/" + template.getName(), page, buttons, commands);
         });
         
         EmptyCommand commandHelp = new EmptyCommand() {
@@ -113,7 +146,7 @@ public class HelpCommand extends SubCommand {
             }
         };
         commandHelp.setCommandName(template.getName() + " command", ArgumentType.REQUIRED);
-        commandHelp.setCommandDescription(formatInfoTranslation("tport.command.help.command.commandDescription"));
+        commandHelp.setCommandDescription(formatInfoTranslation(translateKeyPrefix + ".command.help.command.commandDescription"));
         commandHelp.setRunnable((args, player) -> {
             HashMap<String, SubCommand> commandMap = template.collectActions();
             String command = "/" + StringUtils.join(args, " ", 1, args.length);
@@ -131,7 +164,7 @@ public class HelpCommand extends SubCommand {
             }
             commands.removeLast();
             
-            sendInfoTranslation(player, "tport.command.help.command.succeeded", command, commands);
+            sendInfoTranslation(player, translateKeyPrefix + ".command.help.command.succeeded", command, commands);
         });
         commandHelp.setTabRunnable((args, player) -> {
             String s = StringUtils.join(args, " ", 1, args.length - 1) + " ";
@@ -149,12 +182,12 @@ public class HelpCommand extends SubCommand {
                 public String getCommandName() {
                     return "";
                 }
-    
+                
                 @Override
                 public Message getCommandDescription() {
                     return commandMessage;
                 }
-    
+                
                 @Override
                 public String getName(String argument) {
                     return "";
@@ -177,12 +210,12 @@ public class HelpCommand extends SubCommand {
             hover.addMessage(subCommand.permissionsHover());
             hover.addNewLine();
             if (subCommand.getPermissions().stream().anyMatch(p -> p.contains("<") || p.contains("["))) {
-                hover.addMessage(formatErrorTranslation("tport.command.help.page.cantMeasurePerm"));
+                hover.addMessage(formatErrorTranslation(translateKeyPrefix + ".command.help.page.cantMeasurePerm"));
             } else {
-                hover.addMessage(formatInfoTranslation("tport.command.help.page.perm",
+                hover.addMessage(formatInfoTranslation(translateKeyPrefix + ".command.help.page.perm",
                         (subCommand.hasPermissionToRun(player, false) ?
-                                formatTranslation(goodColor, goodColor, "tport.command.help.page.do") :
-                                formatTranslation(badColor, badColor, "tport.command.help.page.dont")
+                                formatTranslation(goodColor, goodColor, translateKeyPrefix + ".command.help.page.do") :
+                                formatTranslation(badColor, badColor, translateKeyPrefix + ".command.help.page.dont")
                         )));
             }
         }
@@ -202,7 +235,7 @@ public class HelpCommand extends SubCommand {
             }
         };
         helpCommand.setRunnable(command);
-        helpCommand.setCommandDescription(formatInfoTranslation("tport.command.help.extraHelp"));
+        helpCommand.setCommandDescription(formatInfoTranslation(translateKeyPrefix + ".command.help.extraHelp"));
         addExtraHelp(helpName, helpCommand);
     }
     
@@ -255,8 +288,8 @@ public class HelpCommand extends SubCommand {
                 return;
             }
         }
-        sendErrorTranslation(player, "tport.command.wrongUsage",
+        sendErrorTranslation(player, translateKeyPrefix + ".command.wrongUsage",
                 "/" + template.getName() + " help " + (commandMessage == null ? "<" : "[") + "page|" + template.getName() + " command..." +
-                extraHelp.stream().collect(Collectors.joining("|", (extraHelp.size() == 0 ? "" : "|"), "")) + (commandMessage == null ? ">" : "]"));
+                        extraHelp.stream().collect(Collectors.joining("|", (extraHelp.size() == 0 ? "" : "|"), "")) + (commandMessage == null ? ">" : "]"));
     }
 }

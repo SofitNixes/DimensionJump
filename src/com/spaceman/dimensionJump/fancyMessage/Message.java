@@ -34,6 +34,10 @@ import static com.spaceman.dimensionJump.fancyMessage.language.Language.*;
 
 public class Message implements Cloneable {
     
+    public static final String translateKeyPrefix = "plugin"; //todo set prefix
+    public static final String command = "plugin"; //todo set command
+    public static final String pluginName = "plugin"; //todo set plugin name
+    
     private final ArrayList<TextComponent> components = new ArrayList<>();
     
     public Message() {

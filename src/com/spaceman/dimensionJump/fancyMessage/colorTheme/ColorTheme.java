@@ -1,15 +1,12 @@
 package com.spaceman.dimensionJump.fancyMessage.colorTheme;
 
-import com.spaceman.dimensionJump.Pair;
+import com.spaceman.Pair;
 import com.spaceman.dimensionJump.fancyMessage.Message;
 import com.spaceman.dimensionJump.fancyMessage.TextComponent;
 import com.spaceman.dimensionJump.fancyMessage.TextType;
 import com.spaceman.dimensionJump.fancyMessage.events.ClickEvent;
-import com.spaceman.dimensionJump.fancyMessage.events.HoverEvent;
 import com.spaceman.dimensionJump.fileHander.Files;
-import com.spaceman.dimensionJump.playerUUID.PlayerUUID;
 import org.bukkit.ChatColor;
-import org.bukkit.block.Biome;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 
@@ -190,22 +187,6 @@ public class ColorTheme implements ConfigurationSerializable {
                 text.addTranslateWith((Message) o);
             } else if (o instanceof TextComponent) {
                 text.addTranslateWith((TextComponent) o);
-            } else if (o instanceof Player) {
-                Player player = (Player) o;
-                TextComponent component = new TextComponent(player.getName(), varColor);
-                String command = "/tport pltp tp " + player.getName();
-                component.addTextEvent(hoverEvent(command, ColorType.infoColor));
-                component.addTextEvent(ClickEvent.runCommand(command));
-                component.setInsertion(player.getName());
-                text.addTranslateWith(component);
-            } else if (o instanceof Biome) {
-                Biome biome = (Biome) o;
-                TextComponent component = new TextComponent(biome.toString(), varColor);
-                String command = "/tport biomeTP whitelist " + biome.toString();
-                component.addTextEvent(hoverEvent(command, ColorType.infoColor));
-                component.addTextEvent(ClickEvent.runCommand(command));
-                component.setInsertion(biome.toString());
-                text.addTranslateWith(component);
             } else {
                 String textPiece = o.toString();
                 TextComponent component = textComponent(textPiece, varColor);

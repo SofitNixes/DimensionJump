@@ -1,6 +1,5 @@
 package com.spaceman.dimensionJump;
 
-
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.util.HashMap;

@@ -13,8 +13,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static com.spaceman.dimensionJump.fancyMessage.Message.translateKeyPrefix;
 import static com.spaceman.dimensionJump.fancyMessage.TextComponent.textComponent;
 import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.ColorType.*;
+import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.formatErrorTranslation;
 import static com.spaceman.dimensionJump.fancyMessage.colorTheme.ColorTheme.formatInfoTranslation;
 
 public abstract class SubCommand {
@@ -22,7 +24,7 @@ public abstract class SubCommand {
     private ArrayList<SubCommand> actions = new ArrayList<>();
     private ArgumentType argumentType = ArgumentType.FIXED;
     private String commandName = getName("");
-    private Message commandDescription = new Message(textComponent("sub-command description not given"));
+    private Message commandDescription = formatErrorTranslation(translateKeyPrefix + ".commandHandler.subCommand.descriptionNotGiven");
     private boolean linked = false;
     
     private List<String> permissions = new ArrayList<>();
@@ -149,7 +151,7 @@ public abstract class SubCommand {
     }
     public Message permissionsHover() {
         if (permissions.size() == 1) {
-            return formatInfoTranslation("tport.commandHandler.subCommand.permissionHover.singular", permissions.get(0));
+            return formatInfoTranslation(translateKeyPrefix + ".commandHandler.subCommand.permissionHover.singular", permissions.get(0));
         } else {
             Message message = new Message();
             message.addText(textComponent(permissions.get(0), varInfoColor).setInsertion(permissions.get(0)));
@@ -161,11 +163,11 @@ public abstract class SubCommand {
                 color = !color;
             }
             message.addWhiteSpace();
-            message.addMessage(formatInfoTranslation("tport.permissions.permissionHandler." + (permissionsOR ? "or" : "and")));
+            message.addMessage(formatInfoTranslation(translateKeyPrefix + ".permissions.permissionHandler." + (permissionsOR ? "or" : "and")));
             message.addWhiteSpace();
             String permission = permissions.get(permissions.size() - 1);
             message.addText(textComponent(permission, color ? varInfoColor : varInfo2Color).setInsertion(permission));
-            return formatInfoTranslation("tport.commandHandler.subCommand.permissionHover.multiple", message);
+            return formatInfoTranslation(translateKeyPrefix + ".commandHandler.subCommand.permissionHover.multiple", message);
         }
     }
     
